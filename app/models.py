@@ -92,6 +92,7 @@ class Solution(models.Model):
                                           verbose_name='Домашняя работа')
     # mark = models.SmallIntegerField(verbose_name='Оценка', blank=True, null=True)
     task_solved = models.BooleanField(verbose_name='Задача решена?')
+    task_cheked = models.BooleanField(verbose_name='Задача проверена?', default=0)
 
     def __str__(self):
         return f'{self.solution_task} - {self.homework_solution}'
