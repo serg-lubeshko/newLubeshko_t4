@@ -1,6 +1,7 @@
 from django.urls import path
 
 from app.views.course_view import CourseList, DetailCourse, AddTeacher, AddStudent
+from app.views.lecture_view import LectureToCourse, LectureRUD
 from app.views.person_view import UserRegister
 
 urlpatterns = [
@@ -11,5 +12,8 @@ urlpatterns = [
     path('course/detail/<int:pk>', DetailCourse.as_view()),
     path('course/add-professor/<int:course_id>', AddTeacher.as_view()),
     path('course/add-student/<int:course_id>', AddStudent.as_view()),
+
+    path('lecture-add/<int:course_id>', LectureToCourse.as_view()),
+    path('lecture-rud/<int:id>', LectureRUD.as_view()),
 
 ]

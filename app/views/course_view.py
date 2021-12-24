@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
@@ -54,26 +53,21 @@ class DetailCourse(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AddTeacher(GenericAPIView):
-    """ Добавляет профессора на курс и делает проверки (есть владелец  курса,
-    не добавлен ли повторно)
-    """
+    """ Добавляет профессора """
 
-    # permission_classes = [IsAuthenticated, IsOwnerOrReadOnly, IsProfessorOrReadOnly]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly, IsProfessorOrReadOnly]
     serializer_class = AddTeacherSerializer
 
     def get(self, request, course_id):
         try:
             quer = Course.objects.get(id=course_id)
-            serializer = CourseSerializer(quer)
+            serializer = CourseDetailSerializer(quer)
             return Response(serializer.data)
         except Course.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    # def get_teacher_query(self, username):
-    #     return get_object_or_None(MyUser, username=username)
-
     def post(self, request, course_id):
-        check = CheckCourse(course_id, request.data['teacher']).get_professor()  # Название подумать
+        check = CheckCourse(course_id, request.data['teacher']).get_professor()
         if check is None:
             serializer = self.serializer_class(data=request.data)
             teacher_pk = MyUser.objects.filter(username=request.data['teacher'])[0].pk
