@@ -4,10 +4,7 @@ from app.views.course_view import CourseList, DetailCourse, AddTeacher, AddStude
 from app.views.homework_view import HomeworkToLecture
 from app.views.lecture_view import LectureToCourse, LectureRUD, LectureList
 from app.views.person_view import UserRegister
-
-
-
-
+from app.views.solution_view import SolutionToHomework
 
 urlpatterns = [
 
@@ -24,6 +21,6 @@ urlpatterns = [
 
     path('add-homework/', HomeworkToLecture.as_view()),
 
-
+    path('watch-task-and-add-solution/', SolutionToHomework.as_view()),
 
 ]

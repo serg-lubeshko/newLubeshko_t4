@@ -98,7 +98,7 @@ class AddStudent(GenericAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, course_id):
-        check = CheckCourse(course_id, request.data['student']).get_student()
+        check = CheckCourse(course_id, request.data['student']).get_student(request.user.pk)
         if check is None:
             serializer = self.serializer_class(data=request.data)
             student_pk = MyUser.objects.filter(username=request.data['student'])[0].pk

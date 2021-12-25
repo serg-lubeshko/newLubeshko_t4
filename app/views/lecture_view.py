@@ -27,7 +27,7 @@ class LectureList(generics.ListAPIView):
 
 
 class LectureToCourse(GenericAPIView):
-    """ Лекций к курсу может добавить профессор."""
+    """ Лекции к курсу может добавить профессор."""
 
     permission_classes = [IsAuthenticated, IsRegisteredPersonCourse]
     serializer_class = LectureSerializer
@@ -48,8 +48,6 @@ class LectureToCourse(GenericAPIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save(course_id=course_id, professor_id=self.request.user.id)  # ПООООМЕНЯТЬ ID
             return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 
 
 class LectureRUD(generics.RetrieveUpdateDestroyAPIView):

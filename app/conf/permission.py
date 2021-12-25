@@ -37,8 +37,9 @@ class IsProffesorToLecture(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.professor.pk == request.user.pk
 
+
 class IsLecturerOrReadOnly(permissions.BasePermission):
-    message = 'Лекцию может добавить, только владелец'
+    message = 'Проверьте запрос, возможно такой лекции у Вас нет'
 
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -49,6 +50,20 @@ class IsLecturerOrReadOnly(permissions.BasePermission):
         except Lecture.DoesNotExist:
             return False
         return bool(request.user.status == 'p' and request.user.pk == professor_pk)
+
+
+class IsStudentOrReadOnly(permissions.BasePermission):
+    message = "Только студент данного курса может добавить работу"
+
+    def has_permission(self, request, view):
+        try:
+            param_solution = request.data['homework_solution']
+            homework_count = Homework.objects.filter(
+                lecture_for_homework__course__studcour__student_id=request.user.pk).filter(id=param_solution).count()
+        except Homework.DoesNotExist:
+            return False
+        return bool(request.user.status == 's' and homework_count > 0)
+
 
 
 
@@ -118,7 +133,6 @@ class IsProfessorOrReadOnlyMarkDetail(permissions.BasePermission):
             return False
         return bool(request.user.status == 'p' and request.user.pk == professor_pk)
 
-
 # class XXXX(permissions.BasePermission):
 #
 #     def has_object_permission(self, request, view, obj):
@@ -127,9 +141,3 @@ class IsProfessorOrReadOnlyMarkDetail(permissions.BasePermission):
 #             return True
 #
 #         return obj.professor.pk == request.user.pk
-
-class IsStudentOrReadOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        # if request.method in permissions.SAFE_METHODS:
-        #     return True
-        return request.user.status == 's'
