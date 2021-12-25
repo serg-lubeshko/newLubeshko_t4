@@ -4,15 +4,29 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from app.conf.permission import IsRegisteredPersonCourse, IsProffesorToLecture
 from app.models import Course, Lecture
 from app.serializers.serializers_lecture import LectureSerializer, CourseLectureSerializer
 
 
-class LectureToCourse(GenericAPIView):
-    """Список лекций к курсу может добавить профессор. ????? Подумать над приглашенным"""
+class LectureList(generics.ListAPIView):
+    """  Список курса с лекциями """
 
-    # permission_classes = [IsAuthenticated, IsRegisteredPersonCourse]
-    # permission_classes = [IsAuthenticated, IsRegisteredPersonCourse]
+    permission_classes = [IsAuthenticated]
+    serializer_class = CourseLectureSerializer
+    queryset = Course.objects.all()
+
+    def get_queryset(self):
+        if self.request.user.status in ('p'):
+            return Course.objects.filter(teacher=self.request.user.pk)
+        elif self.request.user.status in ('s'):
+            return Course.objects.filter(student=self.request.user.pk)
+
+
+class LectureToCourse(GenericAPIView):
+    """ Лекций к курсу может добавить профессор."""
+
+    permission_classes = [IsAuthenticated, IsRegisteredPersonCourse]
     serializer_class = LectureSerializer
     parser_classes = (FormParser, MultiPartParser)
 
@@ -32,15 +46,11 @@ class LectureToCourse(GenericAPIView):
             serializer.save(course_id=course_id, professor_id=self.request.user.id)  # ПООООМЕНЯТЬ ID
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # def perform_create(self, serializer):
-    #     serializer.save(course_id=1, professor_id=self.request.user.pk)
-
 
 class LectureRUD(generics.RetrieveUpdateDestroyAPIView):
     """ Обновление, удаление лекции. Может только автор лекции """
 
-    # permission_classes = [IsAuthenticated, IsProffesorOwnerOrReadOnly]
-    # permission_classes = [IsAuthenticated, IsProffesorOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated, IsProffesorToLecture]
     serializer_class = LectureSerializer
     queryset = Lecture.objects.all()
-    lookup_field = "id"                         # id лекции
+    lookup_field = "id"  # id лекции

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from app.models import Course, StudCour, TeachCour
 from app.serializers.serializers_person import UserSerializer
@@ -11,10 +12,11 @@ class CourseSerializer(serializers.ModelSerializer):
     """>>>  CourseList  >>> DetailCourse"""
 
     # author = UserSerializer(read_only=True)        
-
+    name_course = serializers.CharField(max_length=125, validators=[UniqueValidator(queryset=Course.objects.all())])
     class Meta:
         model = Course
-        fields = ['id', 'name', 'description', 'published_at', 'update_at']
+        fields = ['id', 'name_course', 'description', 'published_at', 'update_at']
+        
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
@@ -27,7 +29,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['id', 'name', 'description', 'published_at', 'update_at', 'author']
+        fields = ['id', 'name_course', 'description', 'published_at', 'update_at', 'author']
 
 
 

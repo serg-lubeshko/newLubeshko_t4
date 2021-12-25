@@ -3,6 +3,7 @@ from django.db import models
 
 
 class MyUser(AbstractUser):
+    """ Модель Пользователей """
     class StatusPerson(models.TextChoices):
         Pr = 'p', 'Professor'
         St = 's', 'Student'
@@ -19,7 +20,7 @@ class MyUser(AbstractUser):
 class Course(models.Model):
     """ Модель курсов """
 
-    name = models.CharField(max_length=255, verbose_name='Название курса')
+    name_course = models.CharField(max_length=255, verbose_name='Название курса')
     description = models.TextField(verbose_name='Описание', blank=True)
     published_at = models.DateTimeField(auto_now_add=True, verbose_name='Опубликовано')
     update_at = models.DateTimeField(auto_now=True, verbose_name='Последние изменения')
@@ -34,6 +35,8 @@ class Course(models.Model):
 
 
 class StudCour(models.Model):
+    """ Модель приглашенных студентов """
+
     student = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
@@ -42,6 +45,8 @@ class StudCour(models.Model):
 
 
 class TeachCour(models.Model):
+    """ Модель приглашенных преподователей """
+
     teacher = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='tea')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='cou')
 
@@ -50,7 +55,7 @@ class TeachCour(models.Model):
 
 
 class Lecture(models.Model):
-    """ Модель курсов """
+    """ Модель лекций """
 
     title = models.CharField(max_length=255, verbose_name='Название лекции')
     file_present = models.FileField(upload_to='files/%Y/%m/%d/', blank=True, verbose_name="Презентация")
@@ -66,7 +71,7 @@ class Lecture(models.Model):
 
 
 class Homework(models.Model):
-    """ Модель курсов """
+    """ Модель домашних заданий """
 
     homework_task = models.TextField(verbose_name='Домашняя работа')
     title = models.CharField(verbose_name='Название домашней работы', max_length=155)
@@ -83,7 +88,7 @@ class Homework(models.Model):
 
 
 class Solution(models.Model):
-    """ Модель решения задачи"""
+    """ Модель решения задачи """
 
     solution_task = models.URLField(verbose_name='Решение')
     user_solution = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='user_solution',
@@ -99,6 +104,8 @@ class Solution(models.Model):
 
 
 class Mark(models.Model):
+    """ Модель оценок """
+
     mark = models.SmallIntegerField(verbose_name='Оценка')
     solution = models.OneToOneField(Solution, verbose_name='Решение', related_name='mark_solution', blank=True,
                                     null=True,
@@ -110,6 +117,8 @@ class Mark(models.Model):
 
 
 class MessageTeacher(models.Model):
+    """ Модель сообщений преподователей """
+
     text = models.TextField(blank=False, null=True, verbose_name='Текстовое сообщение')
     # user_message = models.ForeignKey(MyUser, verbose_name='Сообщение написал', on_delete=models.CASCADE)
     mark_message = models.ForeignKey(Mark, verbose_name='Оценка_ID', on_delete=models.CASCADE,

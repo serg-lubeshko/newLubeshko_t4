@@ -3,12 +3,12 @@ from rest_framework import permissions
 from app.models import Homework, Lecture, StudCour, TeachCour
 
 
-
 class IsProfessorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user.status == 'p'
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
 
@@ -17,34 +17,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
 
         return obj.author == request.user
-
-
-
-
-
-
-
-
-
-class IsProffesorOwnerOrReadOnly(permissions.BasePermission):
-
-    def has_object(self, request, view, obj):
-        # if request.method in permissions.SAFE_METHODS:
-        #     return True
-        print(obj, '***********')
-        return obj.professor.pk == request.user.pk
-
-
-class IsRegisteredStudent(permissions.BasePermission):
-    def has_permission(self, request, view):
-        try:
-            param = request.parser_context['kwargs'].get('homework_id')
-            id_lecture = Homework.objects.get(id=param).lecture_for_homework_id
-            id_course = Lecture.objects.get(id=id_lecture).course_id
-            user = request.user.pk
-            return StudCour.objects.filter(course_id=id_course).filter(student_id=user)
-        except Homework.DoesNotExist:
-            return False
 
 
 class IsRegisteredPersonCourse(permissions.BasePermission):
@@ -58,6 +30,32 @@ class IsRegisteredPersonCourse(permissions.BasePermission):
         if status_user in ('p',) and TeachCour.objects.filter(teacher_id=request.user.pk).filter(course_id=param):
             return True
         return False
+
+
+class IsProffesorToLecture(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return obj.professor.pk == request.user.pk
+
+
+
+
+
+
+
+
+
+
+class IsRegisteredStudent(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            param = request.parser_context['kwargs'].get('homework_id')
+            id_lecture = Homework.objects.get(id=param).lecture_for_homework_id
+            id_course = Lecture.objects.get(id=id_lecture).course_id
+            user = request.user.pk
+            return StudCour.objects.filter(course_id=id_course).filter(student_id=user)
+        except Homework.DoesNotExist:
+            return False
 
 
 class IsRegisteredPersonHomework(permissions.BasePermission):
