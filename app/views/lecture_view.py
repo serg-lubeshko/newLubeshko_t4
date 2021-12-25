@@ -1,3 +1,6 @@
+from django.utils.decorators import method_decorator
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, generics
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -45,6 +48,8 @@ class LectureToCourse(GenericAPIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save(course_id=course_id, professor_id=self.request.user.id)  # ПООООМЕНЯТЬ ID
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 
 class LectureRUD(generics.RetrieveUpdateDestroyAPIView):

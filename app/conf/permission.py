@@ -37,7 +37,18 @@ class IsProffesorToLecture(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.professor.pk == request.user.pk
 
+class IsLecturerOrReadOnly(permissions.BasePermission):
+    message = 'Лекцию может добавить, только владелец'
 
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        try:
+            param_solution = request.data['lecture_for_homework']
+            professor_pk = Lecture.objects.get(id=param_solution).professor_id
+        except Lecture.DoesNotExist:
+            return False
+        return bool(request.user.status == 'p' and request.user.pk == professor_pk)
 
 
 

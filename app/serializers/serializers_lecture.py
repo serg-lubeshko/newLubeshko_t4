@@ -9,8 +9,8 @@ from app.serializers.serializers_person import UserSerializer
 class LectureSerializer(serializers.ModelSerializer):
     """>>> LectureToCourse >>>  LectureRUD """
 
-    professor = UserSerializer(read_only=True)
-    name_course = CourseSerializer(read_only=True)
+    professor = UserSerializer(read_only=True, help_text='readonly')
+    name_course = CourseSerializer(read_only=True, help_text='readonly')
     title = serializers.CharField(max_length=255, validators=[UniqueValidator(queryset=Lecture.objects.all())])
 
     class Meta:
