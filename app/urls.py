@@ -3,6 +3,7 @@ from django.urls import path
 from app.views.course_view import CourseList, DetailCourse, AddTeacher, AddStudent
 from app.views.homework_view import HomeworkToLecture
 from app.views.lecture_view import LectureToCourse, LectureRUD, LectureList
+from app.views.mark_message_view import ProfessorWatchHomework, ProfessorMarkDetail, StudentLookHisSolution
 from app.views.person_view import UserRegister
 from app.views.solution_view import SolutionToHomework
 
@@ -22,5 +23,10 @@ urlpatterns = [
     path('add-homework/', HomeworkToLecture.as_view()),
 
     path('watch-task-and-add-solution/', SolutionToHomework.as_view()),
+
+    path('professor-watch-homework-add-mark-message/', ProfessorWatchHomework.as_view()),
+    path('professor-update-mark/<int:solution_id>', ProfessorMarkDetail.as_view()),
+
+    path('student-look-check-solutions/', StudentLookHisSolution.as_view()),
 
 ]

@@ -108,8 +108,8 @@ class Mark(models.Model):
 
     mark = models.SmallIntegerField(verbose_name='Оценка')
     solution = models.OneToOneField(Solution, verbose_name='Решение', related_name='mark_solution', blank=True,
-                                    null=True,
-                                    on_delete=models.CASCADE)
+                                         null=True,
+                                         on_delete=models.CASCADE)
     user_mark = models.ForeignKey(MyUser, related_name='user_mark', on_delete=models.CASCADE)
 
     def __str__(self):

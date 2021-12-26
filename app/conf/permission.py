@@ -56,6 +56,8 @@ class IsStudentOrReadOnly(permissions.BasePermission):
     message = "Только студент данного курса может добавить работу"
 
     def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.status == 's'
         try:
             param_solution = request.data['homework_solution']
             homework_count = Homework.objects.filter(
@@ -63,6 +65,44 @@ class IsStudentOrReadOnly(permissions.BasePermission):
         except Homework.DoesNotExist:
             return False
         return bool(request.user.status == 's' and homework_count > 0)
+
+#Проверить___________________________________________________________
+class IsProfessorOrReadOnlyMark(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.status == 'p'
+        try:
+            param_solution = request.data['solution_id']
+            professor_pk = Homework.objects.get(homework_solution__id=param_solution).professor_id
+        except Homework.DoesNotExist:
+            return False
+        return bool(request.user.status == 'p' and request.user.pk == professor_pk)
+
+#Проверить__________________________________________________________________________________________
+class IsProfessorOrReadOnlyMarkDetail(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.status == 'p'
+        # param_solution = request.data['solution_id']
+        print(request.parser_context['kwargs'])
+        try:
+            param_solution = request.parser_context['kwargs'].get('solution_id')
+            professor_pk = Homework.objects.get(homework_solution__id=param_solution).professor_id
+        except Homework.DoesNotExist:
+            return False
+        return bool(request.user.status == 'p' and request.user.pk == professor_pk)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -98,46 +138,4 @@ class IsRegisteredPersonHomework(permissions.BasePermission):
         return False
 
 
-# class IsProfessorOrReadOnlyMark(permissions.BasePermission):
-#     def has_permission(self, request, view):
-#         print('eddedede')
-#         # if request.method in permissions.SAFE_METHODS:
-#         #     return True
-#         return bool(
-#             request.user.status == 'p',
-#         )
 
-
-class IsProfessorOrReadOnlyMark(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return request.user.status == 'p'
-        try:
-            param_solution = request.data['solution_id']
-            professor_pk = Homework.objects.get(homework_solution__id=param_solution).professor_id
-        except Homework.DoesNotExist:
-            return False
-        return bool(request.user.status == 'p' and request.user.pk == professor_pk)
-
-
-class IsProfessorOrReadOnlyMarkDetail(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return request.user.status == 'p'
-        # param_solution = request.data['solution_id']
-        print(request.parser_context['kwargs'])
-        try:
-            param_solution = request.parser_context['kwargs'].get('solution_id')
-            professor_pk = Homework.objects.get(homework_solution__id=param_solution).professor_id
-        except Homework.DoesNotExist:
-            return False
-        return bool(request.user.status == 'p' and request.user.pk == professor_pk)
-
-# class XXXX(permissions.BasePermission):
-#
-#     def has_object_permission(self, request, view, obj):
-#
-#         if request.method in permissions.SAFE_METHODS:
-#             return True
-#
-#         return obj.professor.pk == request.user.pk
