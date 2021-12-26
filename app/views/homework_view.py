@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -7,6 +9,11 @@ from app.models import Homework, Lecture
 from app.serializers.serializers_homework import HomeworkSerializer, LectureFofHomework
 
 
+
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Добавление домашней работы к лекции"))
+@method_decorator(name='get', decorator=swagger_auto_schema(
+    operation_description="Список лекций и домашних работ"))
 class HomeworkToLecture(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, IsLecturerOrReadOnly]
     serializer_class = HomeworkSerializer

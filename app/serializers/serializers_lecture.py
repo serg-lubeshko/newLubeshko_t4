@@ -9,9 +9,10 @@ from app.serializers.serializers_person import UserSerializer
 class LectureSerializer(serializers.ModelSerializer):
     """>>> LectureToCourse >>>  LectureRUD """
 
-    professor = UserSerializer(read_only=True, help_text='readonly')
-    name_course = CourseSerializer(read_only=True, help_text='readonly')
+    professor = serializers.PrimaryKeyRelatedField(read_only=True)
+    name_course = serializers.PrimaryKeyRelatedField(read_only=True)
     title = serializers.CharField(max_length=255, validators=[UniqueValidator(queryset=Lecture.objects.all())])
+
 
     class Meta:
         model = Lecture
@@ -27,4 +28,4 @@ class CourseLectureSerializer(serializers.ModelSerializer):
     # name_course=serializers.Lecture2Serializer(many=True, read_only=True)
     class Meta:
         model = Course
-        fields = ['name_course', 'lectures']
+        fields = ['id','name_course', 'lectures']

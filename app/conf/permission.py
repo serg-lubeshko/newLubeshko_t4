@@ -66,7 +66,7 @@ class IsStudentOrReadOnly(permissions.BasePermission):
             param_solution = request.data['homework_solution']
             homework_count = Homework.objects.filter(
                 lecture_for_homework__course__studcour__student_id=request.user.pk).filter(id=param_solution).count()
-        except Homework.DoesNotExist:
+        except (Homework.DoesNotExist, KeyError):
             return False
         return bool(request.user.status == 's' and homework_count > 0)
 
@@ -81,7 +81,7 @@ class IsProfessorOrReadOnlyMark(permissions.BasePermission):
         except Homework.DoesNotExist:
             return False
         return bool(request.user.status == 'p' and request.user.pk == professor_pk)
-
+#
 #Проверить__________________________________________________________________________________________
 class IsProfessorOrReadOnlyMarkDetail(permissions.BasePermission):
     def has_permission(self, request, view):

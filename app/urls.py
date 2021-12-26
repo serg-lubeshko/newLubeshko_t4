@@ -17,13 +17,13 @@ urlpatterns = [
     path('b-course/add-professor/<int:course_id>', AddTeacher.as_view()),
     path('b-course/add_del-student/<int:course_id>', AddStudent.as_view()),
 
-    path('lecture-add/<int:course_id>', LectureToCourse.as_view()),
-    path('lecture-rud/<int:id>', LectureRUD.as_view()),
-    path('lecture-list/', LectureList.as_view()),
+    path('bc-lecture-list/', LectureList.as_view()),
+    path('c-lecture-add/<int:course_id>', LectureToCourse.as_view()),
+    path('c-lecture-rud/<int:id>', LectureRUD.as_view()),
 
-    path('c-add-homework/', HomeworkToLecture.as_view()),
+    path('d-add-homework/', HomeworkToLecture.as_view()),
 
-    path('student-watch-task-and-add-solution/', SolutionToHomework.as_view()),
+    path('e-student-watch-task-and-add-solution/', SolutionToHomework.as_view()),
 
     path('professor-watch-homework-add-mark-message/', ProfessorWatchHomework.as_view()),
     path('professor-update-mark/<int:solution_id>', ProfessorMarkDetail.as_view()),

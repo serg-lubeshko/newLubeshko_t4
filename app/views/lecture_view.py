@@ -1,5 +1,4 @@
 from django.utils.decorators import method_decorator
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, generics
 from rest_framework.generics import GenericAPIView
@@ -12,6 +11,8 @@ from app.models import Course, Lecture
 from app.serializers.serializers_lecture import LectureSerializer, CourseLectureSerializer
 
 
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    operation_description="Список лекций к курсу"))
 class LectureList(generics.ListAPIView):
     """  Список курса с лекциями """
 
@@ -26,6 +27,10 @@ class LectureList(generics.ListAPIView):
             return Course.objects.filter(student=self.request.user.pk)
 
 
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Добавляем лекцию к курсу."))
+@method_decorator(name='get', decorator=swagger_auto_schema(
+    operation_description="Информация по курсу с лекциями. Вводим id курса"))
 class LectureToCourse(GenericAPIView):
     """ Лекции к курсу может добавить профессор."""
 
@@ -50,8 +55,12 @@ class LectureToCourse(GenericAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@method_decorator(name='put', decorator=swagger_auto_schema(
+    operation_description="Редактирование  лекции (только автор). Вводим id лекции. В API Django файл спокойно редактируется "))
+@method_decorator(name='get', decorator=swagger_auto_schema(
+    operation_description="Информация по лекции. Вводим id лекции"))
 class LectureRUD(generics.RetrieveUpdateDestroyAPIView):
-    """ Обновление, удаление лекции. Может только автор лекции """
+    """ Обновление, удаление лекции. Может только автор лекции. Вводим id лекции """
 
     permission_classes = [IsAuthenticated, IsProffesorToLecture]
     serializer_class = LectureSerializer

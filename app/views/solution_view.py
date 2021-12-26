@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -7,6 +9,10 @@ from app.models import Homework
 from app.serializers.serializers_solutions import SolutionSerializers, HomeworkForSolution
 
 
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Студент отправляет ссылку на решения ро Д/з"))
+@method_decorator(name='get', decorator=swagger_auto_schema(
+    operation_description="Студент смотрит СВОИ домашние работы"))
 class SolutionToHomework(generics.GenericAPIView):
     """ Решения студентов """
 
@@ -23,6 +29,6 @@ class SolutionToHomework(generics.GenericAPIView):
         serializer = self.serializer_class(data=self.request.data,
                                            context={'request': request})
         if serializer.is_valid(raise_exception=True):
-            serializer.save(user_solution_id=self.request.user.id)
+            serializer.save(user_solution_id=self.request.user.id, task_solved=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)

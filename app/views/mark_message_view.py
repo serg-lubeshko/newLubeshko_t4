@@ -66,7 +66,7 @@ class ProfessorWatchHomework(generics.GenericAPIView):
 class ProfessorMarkDetail(generics.RetrieveUpdateAPIView):
     """ Профессор меняет оценку"""
 
-    # permission_classes = [IsAuthenticated, IsProfessorOrReadOnlyMarkDetail]
+    permission_classes = [IsAuthenticated, IsProfessorOrReadOnlyMarkDetail]
     serializer_class = MarkDetailSerializers
     queryset = Mark.objects.all()
     lookup_field = 'solution_id'
