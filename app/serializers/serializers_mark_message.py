@@ -25,7 +25,17 @@ class MarkSerializer(serializers.ModelSerializer):
         instance = message | {'mark_message_id': mark_id}
         return MessageTeacher.objects.create(**instance)
 
+    def validate(self, data):
+        # user_id = self.context['request'].user.pk
+        solution_id = self.context['request'].data['solution_id']
+        # data_dict = dict(data)
+        if Mark.objects.filter(solution_id=solution_id).count() > 0:
+            raise serializers.ValidationError("Вы добавили оценку")
+        # if Lecture.objects.filter(id=data_dict['lecture_for_homework_id']).first().professor.pk != user_id:
+        #     raise serializers.ValidationError("У вас нет прав")
+        return data
 
+#_______________________________________________________________________________________________
 class SolutionForProfessorCheckSerializer(serializers.ModelSerializer):
     id_user = serializers.IntegerField(source='id', read_only=True)
     user_solution = SolutionSerializers(many=True)
@@ -34,7 +44,7 @@ class SolutionForProfessorCheckSerializer(serializers.ModelSerializer):
         model = MyUser
         fields = ['id_user', 'username', 'user_solution', ]
 
-
+#_______________________________________________________________________________________________
 class MarkDetailSerializers(serializers.ModelSerializer):
     message_professor = MessageSerializer(read_only=True, many=True, source='mark_message')
 
@@ -68,7 +78,7 @@ class SolutionForCheckProfessorSerializer(serializers.ModelSerializer):
         fields = ['id', 'solution_task', 'user_solution', 'homework_solution']
 
 
-# ____________________StudentLookHisSolutionSerializers__________________
+# ____________________StudentLookHisSolutionSerializers_______________________________________
 class MarkToStudentSerializers(serializers.ModelSerializer):
     class Meta:
         model = Mark
