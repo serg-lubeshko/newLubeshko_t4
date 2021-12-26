@@ -12,10 +12,12 @@ from app.serializers.serializers_course import CourseSerializer, AddStudentSeria
     CourseDetailSerializer
 
 
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Профессор добавляет курс"))
 @method_decorator(name='get', decorator=swagger_auto_schema(
-    operation_description="Курс могут смотреть только приглашенные студенты/проффесора, авторы"))
+    operation_description="СВОИ курсы могут смотреть только приглашенные студенты/проффесора, авторы"))
 class CourseList(generics.ListCreateAPIView):
-    """Список своих курсов и приглашенных, а также добавление нового курса"""
+    """Список курсов для приглашенных и авторов(каждый свои курсы), а также добавление нового курса"""
 
     permission_classes = [IsAuthenticated, IsProfessorOrReadOnly, IsOwnerOrReadOnly]
     serializer_class = CourseSerializer
@@ -52,19 +54,21 @@ class DetailCourse(generics.RetrieveUpdateDestroyAPIView):
             return Course.objects.filter(student=user_pk)
 
 
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Добавление нового преподавателя к своему курсу"))
 class AddTeacher(GenericAPIView):
     """ Добавляет профессора """
 
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly, IsProfessorOrReadOnly]
     serializer_class = AddTeacherSerializer
 
-    def get(self, request, course_id):
-        try:
-            quer = Course.objects.get(id=course_id)
-            serializer = CourseDetailSerializer(quer)
-            return Response(serializer.data)
-        except Course.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    # def get(self, request, course_id):
+    #     try:
+    #         quer = Course.objects.get(id=course_id)
+    #         serializer = CourseDetailSerializer(quer)
+    #         return Response(serializer.data)
+    #     except Course.DoesNotExist:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, course_id):
         check = CheckCourse(course_id, request.data['teacher']).get_professor()
@@ -73,7 +77,7 @@ class AddTeacher(GenericAPIView):
             teacher_pk = MyUser.objects.filter(username=request.data['teacher'])[0].pk
             if serializer.is_valid(raise_exception=True) and teacher_pk:
                 TeachCour.objects.create(course_id=course_id, teacher_id=teacher_pk)
-                return Response(status=status.HTTP_201_CREATED)
+                return Response({'message': 'Новый профессор добавлен'}, status=status.HTTP_201_CREATED)
         else:
             return Response({
                 "userMessage": check,
@@ -82,20 +86,23 @@ class AddTeacher(GenericAPIView):
             )
 
 
+@method_decorator(name='put', decorator=swagger_auto_schema(
+    operation_description="Удаление нового студента к своему курсу. метод DELETE не позволяет ввести доп.поле на удаление"))
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Добавление нового студента к своему курсу"))
 class AddStudent(GenericAPIView):
-    """ Добавляем студента     """
+    """ Добавляем/удаляем студента     """
 
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly, IsProfessorOrReadOnly]
-    # queryset = Course.objects.all()
     serializer_class = AddStudentSerializer
 
-    def get(self, request, course_id):
-        try:
-            quer = Course.objects.get(id=course_id)
-            serializer = CourseSerializer(quer)
-            return Response(serializer.data)
-        except Course.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    # def get(self, request, course_id):
+    #     try:
+    #         quer = Course.objects.get(id=course_id)
+    #         serializer = CourseSerializer(quer)
+    #         return Response(serializer.data)
+    #     except Course.DoesNotExist:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, course_id):
         check = CheckCourse(course_id, request.data['student']).get_student(request.user.pk)
@@ -104,7 +111,7 @@ class AddStudent(GenericAPIView):
             student_pk = MyUser.objects.filter(username=request.data['student'])[0].pk
             if serializer.is_valid():
                 StudCour.objects.create(course_id=course_id, student_id=student_pk)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response({'message': 'Новый студент добавлен'}, status=status.HTTP_201_CREATED)
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({
@@ -112,3 +119,12 @@ class AddStudent(GenericAPIView):
             },
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
+
+    def put(self, request, course_id):
+        try:
+            student_pk = MyUser.objects.get(username=request.data['student']).pk
+            StudCour.objects.get(course_id=course_id, student_id=student_pk).delete()
+        except (MyUser.DoesNotExist, StudCour.DoesNotExist):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

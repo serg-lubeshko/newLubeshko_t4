@@ -35,7 +35,8 @@ class MarkSerializer(serializers.ModelSerializer):
         #     raise serializers.ValidationError("У вас нет прав")
         return data
 
-#_______________________________________________________________________________________________
+
+# _______________________________________________________________________________________________
 class SolutionForProfessorCheckSerializer(serializers.ModelSerializer):
     id_user = serializers.IntegerField(source='id', read_only=True)
     user_solution = SolutionSerializers(many=True)
@@ -44,16 +45,30 @@ class SolutionForProfessorCheckSerializer(serializers.ModelSerializer):
         model = MyUser
         fields = ['id_user', 'username', 'user_solution', ]
 
-#_______________________________________________________________________________________________
+
+# _______________________________________________________________________________________________
 class MarkDetailSerializers(serializers.ModelSerializer):
     message_professor = MessageSerializer(read_only=True, many=True, source='mark_message')
+    solution = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Mark
         fields = ['mark', 'solution', 'message_professor']
 
+    # def update(self, instance, validated_data):
+    #     instance.mark = validated_data.get('mark', instance.mark)
+    #     # instance.solution = validated_data.get('solution_id', instance.solution)
+    #     # instance.user_mark = validated_data.get('user_mark_id', instance.user_mark)
+    #     instance.save()
+    #     return instance
+
 
 # ____________________SolutionForCheckProfessorSerializer______________________________________
+class MarkToProfessorSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Mark
+        fields = ['id', 'mark']
+
 
 class UserToSolutionForCheckProfessorSerializer(serializers.ModelSerializer):
     id_user = serializers.IntegerField(source='id', read_only=True)
@@ -72,17 +87,20 @@ class HSToSolutionForCheckProfessorSerializer(serializers.ModelSerializer):
 class SolutionForCheckProfessorSerializer(serializers.ModelSerializer):
     user_solution = UserToSolutionForCheckProfessorSerializer()
     homework_solution = HSToSolutionForCheckProfessorSerializer()
+    mark_solution = MarkToProfessorSerializers()
 
     class Meta:
         model = Solution
-        fields = ['id', 'solution_task', 'user_solution', 'homework_solution']
+        fields = ['id', 'solution_task', 'user_solution', 'homework_solution', 'mark_solution']
 
 
-# ____________________StudentLookHisSolutionSerializers_______________________________________
+# ____________________StudentLookSolutionSerializers_______________________________________
 class MarkToStudentSerializers(serializers.ModelSerializer):
+    mark_message = MessageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Mark
-        fields = ['id', 'mark']
+        fields = ['mark', 'mark_message']
 
 
 class StudentLookHisSolutionSerializers(serializers.ModelSerializer):
@@ -90,4 +108,4 @@ class StudentLookHisSolutionSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Solution
-        fields = ['mark_solution' ,'id', 'solution_task']
+        fields = ['id', 'solution_task', 'mark_solution', ]

@@ -19,3 +19,9 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         return user
+
+
+class ListUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MyUser
+        fields = ('id', 'username', 'status')

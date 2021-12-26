@@ -2,7 +2,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.conf.permission import IsProfessorOrReadOnlyMark, IsProfessorOrReadOnlyMarkDetail
+from app.conf.permission import IsProfessorOrReadOnlyMark, IsProfessorOrReadOnlyMarkDetail, IsStudentReadOnly
 from app.models import MyUser, Mark, Homework, Solution
 from app.serializers.serializers_mark_message import MarkDetailSerializers, SolutionForProfessorCheckSerializer, \
     MarkSerializer, SolutionForCheckProfessorSerializer, StudentLookHisSolutionSerializers
@@ -16,11 +16,21 @@ class ProfessorWatchHomework(generics.GenericAPIView):
     queryset = MyUser.objects.all()
 
     def get(self, request):
+        # query = Solution.objects.filter(task_solved=True,
+        #                                 homework_solution__professor_id=request.user.pk,
+        #                                 task_cheked=False)
+
+        # serializer = SolutionForCheckProfessorSerializer(query, many=True)
         query = Solution.objects.filter(task_solved=True,
-                                        homework_solution__professor_id=request.user.pk,
-                                        task_cheked=False)
-        serializer = SolutionForCheckProfessorSerializer(query, many=True)
-        return Response(serializer.data)
+                                        homework_solution__professor_id=request.user.pk)
+        checked_query = query.filter(task_cheked=True)
+        unchecked_query = query.filter(task_cheked=False)
+        checked_serializer = SolutionForCheckProfessorSerializer(checked_query, many=True)
+        unchecked_serializer = SolutionForCheckProfessorSerializer(unchecked_query, many=True)
+        # return Response(serializer.data)
+        return Response(({'unchecked_solution': unchecked_serializer.data},
+                         {'checked_solution': checked_serializer.data},)
+                        )
 
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data,
@@ -29,6 +39,28 @@ class ProfessorWatchHomework(generics.GenericAPIView):
             serializer.save(user_mark_id=request.user.pk)
             Solution.objects.filter(id=request.data["solution_id"]).update(task_cheked=True)
             return Response(status=status.HTTP_200_OK)
+
+
+# class ProfessorChangeMark(generics.GenericAPIView):
+#     serializer_class = MarkDetailSerializers
+#
+#     def get_queryset(self):
+#         return Mark.objects.get(solution_id=self.request.data['solution_id'])
+#
+#     def put(self, request):
+#         object = self.get_queryset()
+#         print(object,'88888888888')
+#         # serializer = MarkDetailSerializers({'solution_id':request.data['solution_id']},
+#         #                                    {'user_mark_id': request.data.user.pk},
+#         #                                    instance=object,
+#         #                                    partial=True )
+#         serializer = MarkDetailSerializers(instance=object,
+#                                            partial=True)
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response(status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfessorMarkDetail(generics.RetrieveUpdateAPIView):
@@ -43,7 +75,7 @@ class ProfessorMarkDetail(generics.RetrieveUpdateAPIView):
 class StudentLookHisSolution(generics.GenericAPIView):
     """ Студент смотрит solution и оценку, может написать коментарий"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsStudentReadOnly]
     serializer_class = StudentLookHisSolutionSerializers
 
     # queryset = Solution.objects.filter()
@@ -59,12 +91,3 @@ class StudentLookHisSolution(generics.GenericAPIView):
                          {'unverified_homework': unverified_serializer.data})
                         )
 
-# ДОООООООООООООООБАВИТЬ СООБЩЕНИЯ
-# Возможность студента смотреть свои работы
-# Студент пишет коментарии
-# Permission
-# Пересмотреть название полей
-# Переделать лекции
-
-
-# Не понятно как решить проблему с миграциями

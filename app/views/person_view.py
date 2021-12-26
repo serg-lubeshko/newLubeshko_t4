@@ -1,16 +1,18 @@
 from django.contrib.auth import logout, authenticate, login, get_user_model
 from django.shortcuts import redirect
 from rest_framework import permissions, status
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app.serializers.serializers_person import UserSerializer
+from app.serializers.serializers_person import UserSerializer, ListUsersSerializer
 
 MyUser = get_user_model()
 
 
 class UserRegister(CreateAPIView):
+    """ Регистрация пользователя """
+
     model = MyUser
     permission_classes = [
         permissions.AllowAny,
@@ -37,3 +39,10 @@ class MyLoginView(APIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class ListPerson(ListAPIView):
+    """ Вывод списка пользователей """
+
+    serializer_class = ListUsersSerializer
+    queryset = MyUser.objects.all()

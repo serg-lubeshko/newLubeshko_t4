@@ -3,6 +3,10 @@ from rest_framework import permissions
 from app.models import Homework, Lecture, StudCour, TeachCour
 
 
+class IsStudentReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.status == 's'
+
 class IsProfessorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:

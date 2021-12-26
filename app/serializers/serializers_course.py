@@ -11,22 +11,15 @@ MyUser = get_user_model()
 class CourseSerializer(serializers.ModelSerializer):
     """>>>  CourseList  >>> DetailCourse"""
 
-    # author = UserSerializer(read_only=True)        
     name_course = serializers.CharField(max_length=125, validators=[UniqueValidator(queryset=Course.objects.all())])
     class Meta:
         model = Course
         fields = ['id', 'name_course', 'description', 'published_at', 'update_at']
         
 
-
 class CourseDetailSerializer(serializers.ModelSerializer):
-    """ Добавил 'author в сериализатор, я не использовал в CourseSerializer, т.к. на read_only=True
-        swagger не реагирует и выводит поле. Здесь также он выводит при CRUD, а Django's api не выводит 'author'
-        в read_only
-      """
 
-    author = UserSerializer(read_only=True)
-
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Course
         fields = ['id', 'name_course', 'description', 'published_at', 'update_at', 'author']
