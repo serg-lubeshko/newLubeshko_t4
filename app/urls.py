@@ -3,7 +3,8 @@ from django.urls import path
 from app.views.course_view import CourseList, DetailCourse, AddTeacher, AddStudent
 from app.views.homework_view import HomeworkToLecture
 from app.views.lecture_view import LectureToCourse, LectureRUD, LectureList
-from app.views.mark_message_view import ProfessorWatchHomework, ProfessorMarkDetail, StudentLookHisSolution
+from app.views.mark_message_view import ProfessorWatchHomework, ProfessorMarkDetail, StudentLookHisSolution, \
+    StudentMessage, ListMessageForProfessor
 from app.views.person_view import UserRegister, ListPerson
 from app.views.solution_view import SolutionToHomework
 
@@ -25,11 +26,14 @@ urlpatterns = [
 
     path('e-student-watch-task-and-add-solution/', SolutionToHomework.as_view()),
 
-    path('professor-watch-homework-add-mark-message/', ProfessorWatchHomework.as_view()),
-    path('professor-update-mark/<int:solution_id>', ProfessorMarkDetail.as_view()),
+    path('ef-professor-watch-message/', ListMessageForProfessor.as_view()),
+    path('ef-professor-watch-homework-add-mark-message/', ProfessorWatchHomework.as_view()),
+    path('f-professor-update-mark-message/<int:solution_id>', ProfessorMarkDetail.as_view()),
     # path('professor-update-mark/<int:solution_id>', ProfessorChangeMark.as_view()),
 
-    path('student-look-check-solutions/', StudentLookHisSolution.as_view()),
+    path('g-student-look-check-solutions/', StudentLookHisSolution.as_view()),
     # path('student-look-check-chatted/<int:solution_id>', StudentLookHisSolution.as_view()),
+
+    path('student-write-message/', StudentMessage.as_view())
 
 ]

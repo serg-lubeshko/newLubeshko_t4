@@ -3,9 +3,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from app.conf.permission import IsProfessorOrReadOnlyMark, IsProfessorOrReadOnlyMarkDetail, IsStudentReadOnly
-from app.models import MyUser, Mark, Homework, Solution
-from app.serializers.serializers_mark_message import MarkDetailSerializers, SolutionForProfessorCheckSerializer, \
-    MarkSerializer, SolutionForCheckProfessorSerializer, StudentLookHisSolutionSerializers
+from app.models import MyUser, Mark, Solution, MessageTeacher
+from app.serializers.serializers_mark_message import MarkDetailSerializers, MarkSerializer, \
+    SolutionForCheckProfessorSerializer, StudentLookHisSolutionSerializers, StudentMessageSerializers, \
+    ListMessageForProfessorSerialezers
 
 
 class ProfessorWatchHomework(generics.GenericAPIView):
@@ -38,6 +39,8 @@ class ProfessorWatchHomework(generics.GenericAPIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save(user_mark_id=request.user.pk)
             Solution.objects.filter(id=request.data["solution_id"]).update(task_cheked=True)
+            MessageTeacher.objects.create(message_solution_teachers_id=request.data["solution_id"],
+                                          text=request.data["text_message_teacher"])
             return Response(status=status.HTTP_200_OK)
 
 
@@ -71,6 +74,12 @@ class ProfessorMarkDetail(generics.RetrieveUpdateAPIView):
     queryset = Mark.objects.all()
     lookup_field = 'solution_id'
 
+    def put(self, request, *args, **kwargs):
+        print(kwargs, request.data, '********Добавить сохраненияе*****')
+        MessageTeacher.objects.create(message_solution_teachers_id=kwargs['solution_id'],
+                                      text=request.data["text_message_teacher"])
+        return self.update(request, *args, **kwargs)
+
 
 class StudentLookHisSolution(generics.GenericAPIView):
     """ Студент смотрит solution и оценку, может написать коментарий"""
@@ -91,3 +100,28 @@ class StudentLookHisSolution(generics.GenericAPIView):
                          {'unverified_homework': unverified_serializer.data})
                         )
 
+
+class StudentMessage(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated, IsStudentReadOnly]
+    serializer_class = StudentMessageSerializers
+
+    # def get(self, request, solution_id):
+    #     query = Solution.objects.get(id=solution_id)
+    #     serializer = StudentMessageGETSerializers(query)
+    #     return Response(serializer.data)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=self.request.data,
+                                           context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user_message_id=request.user.pk)
+            return Response(status=status.HTTP_200_OK)
+
+
+class ListMessageForProfessor(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsProfessorOrReadOnlyMarkDetail]
+    serializer_class = ListMessageForProfessorSerialezers
+
+    def get_queryset(self):
+        return Solution.objects.filter(task_solved=True,
+                                       homework_solution__professor_id=self.request.user.pk)

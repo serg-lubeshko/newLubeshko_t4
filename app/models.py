@@ -31,7 +31,7 @@ class Course(models.Model):
                                      through='TeachCour', )
 
     def __str__(self):
-        return f"{self.name}|{self.author}"
+        return f"{self.name_course}|{self.author}"
 
 
 class StudCour(models.Model):
@@ -111,6 +111,8 @@ class Mark(models.Model):
                                          null=True,
                                          on_delete=models.CASCADE)
     user_mark = models.ForeignKey(MyUser, related_name='user_mark', on_delete=models.CASCADE)
+    text_message_teacher = models.TextField('Сообщение профессора', blank=True, null=True)
+
 
     def __str__(self):
         return f'{self.mark} | {self.solution}'
@@ -121,10 +123,26 @@ class MessageTeacher(models.Model):
 
     text = models.TextField(blank=False, null=True, verbose_name='Текстовое сообщение')
     # user_message = models.ForeignKey(MyUser, verbose_name='Сообщение написал', on_delete=models.CASCADE)
-    mark_message = models.ForeignKey(Mark, verbose_name='Оценка_ID', on_delete=models.CASCADE,
-                                     related_name='mark_message')
+    # mark_message = models.ForeignKey(Mark, verbose_name='Оценка_ID', on_delete=models.CASCADE,
+    #                                  related_name='mark_message')
 
     published_at = models.DateTimeField(auto_now_add=True, verbose_name='Опубликовано')
+    message_solution_teachers = models.ForeignKey(Solution, verbose_name='Решение_ID', on_delete=models.CASCADE,
+                                     related_name='message_solution_teachers')
 
     def __str__(self):
-        return f'Сообщение текстовое № {self.id}'
+        return f'Сообщение текстовое {self.text}'
+
+
+
+class MessageStudent(models.Model):
+    """ Модель сообщений студента """
+
+    text = models.TextField(blank=False, null=True, verbose_name='Текстовое сообщение')
+    message_solution_students = models.ForeignKey(Solution, verbose_name='Решение_ID', on_delete=models.CASCADE,
+                                     related_name='message_solution_students')
+    published_at = models.DateTimeField(auto_now_add=True, verbose_name='Опубликовано')
+    user_message = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='user_message')
+
+    def __str__(self):
+        return f'Сообщение текстовое {self.text}'
