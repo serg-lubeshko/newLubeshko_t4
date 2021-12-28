@@ -12,28 +12,16 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class MarkSerializer(serializers.ModelSerializer):
     solution_id = serializers.ChoiceField(choices=[i.id for i in Solution.objects.all()])
-    # mark_message = MessageSerializer()
     mark = serializers.IntegerField(min_value=0, max_value=10)
 
     class Meta:
         model = Mark
-        # fields = ['mark', 'solution_id', 'mark_message']
         fields = ['mark', 'solution_id', 'text_message_teacher']
 
-    # def create(self, validated_data):
-    #     message = dict(validated_data.pop('mark_message'))
-    #     mark_id = (Mark.objects.create(**validated_data)).pk
-    #     instance = message | {'mark_message_id': mark_id}
-    #     return MessageTeacher.objects.create(**instance)
-
     def validate(self, data):
-        # user_id = self.context['request'].user.pk
         solution_id = self.context['request'].data['solution_id']
-        # data_dict = dict(data)
         if Mark.objects.filter(solution_id=solution_id).count() > 0:
             raise serializers.ValidationError("Вы добавили оценку")
-        # if Lecture.objects.filter(id=data_dict['lecture_for_homework_id']).first().professor.pk != user_id:
-        #     raise serializers.ValidationError("У вас нет прав")
         return data
 
 
@@ -49,20 +37,11 @@ class SolutionForProfessorCheckSerializer(serializers.ModelSerializer):
 
 # _______________________________________________________________________________________________
 class MarkDetailSerializers(serializers.ModelSerializer):
-    # message_professor = MessageSerializer(read_only=True, many=True, source='mark_message')
     solution = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Mark
-        # fields = ['mark', 'solution', 'message_professor']
         fields = ['mark', 'solution', 'text_message_teacher']
-
-    # def update(self, instance, validated_data):
-    #     instance.mark = validated_data.get('mark', instance.mark)
-    #     # instance.solution = validated_data.get('solution_id', instance.solution)
-    #     # instance.user_mark = validated_data.get('user_mark_id', instance.user_mark)
-    #     instance.save()
-    #     return instance
 
 
 # ____________________SolutionForCheckProfessorSerializer______________________________________
@@ -115,12 +94,6 @@ class StudentLookHisSolutionSerializers(serializers.ModelSerializer):
 
 
 # ___________________StudentMessage___________________________________________________________
-# class StudentMessageGETSerializers(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Solution
-#         fields = ['id', 'solution_task', 'homework_solution_id', 'message_solution_students']
-
 
 class StudentMessageSerializers(serializers.ModelSerializer):
 
@@ -142,12 +115,13 @@ class StudentMessageSerializers(serializers.ModelSerializer):
 
 class MessageStudentSerialezers(serializers.ModelSerializer):
     class Meta:
-        model =MessageStudent
+        model = MessageStudent
         fields = ['text', 'published_at']
 
 
 class ListMessageForProfessorSerialezers(serializers.ModelSerializer):
-    message_solution_students= MessageStudentSerialezers(many=True)
+    message_solution_students = MessageStudentSerialezers(many=True)
+
     class Meta:
         model = Solution
         fields = ['id', 'solution_task', 'mark_solution', 'message_solution_students']

@@ -95,7 +95,6 @@ class Solution(models.Model):
                                       verbose_name='Студент')
     homework_solution = models.ForeignKey(Homework, on_delete=models.CASCADE, related_name='homework_solution',
                                           verbose_name='Домашняя работа')
-    # mark = models.SmallIntegerField(verbose_name='Оценка', blank=True, null=True)
     task_solved = models.BooleanField(verbose_name='Задача решена?')
     task_cheked = models.BooleanField(verbose_name='Задача проверена?', default=0)
 
@@ -119,13 +118,9 @@ class Mark(models.Model):
 
 
 class MessageTeacher(models.Model):
-    """ Модель сообщений преподователей """
+    """ Модель сообщений профессоров """
 
     text = models.TextField(blank=False, null=True, verbose_name='Текстовое сообщение')
-    # user_message = models.ForeignKey(MyUser, verbose_name='Сообщение написал', on_delete=models.CASCADE)
-    # mark_message = models.ForeignKey(Mark, verbose_name='Оценка_ID', on_delete=models.CASCADE,
-    #                                  related_name='mark_message')
-
     published_at = models.DateTimeField(auto_now_add=True, verbose_name='Опубликовано')
     message_solution_teachers = models.ForeignKey(Solution, verbose_name='Решение_ID', on_delete=models.CASCADE,
                                      related_name='message_solution_teachers')

@@ -7,6 +7,7 @@ class IsStudentReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.status == 's'
 
+
 class IsProfessorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -70,7 +71,7 @@ class IsStudentOrReadOnly(permissions.BasePermission):
             return False
         return bool(request.user.status == 's' and homework_count > 0)
 
-#Проверить___________________________________________________________
+
 class IsProfessorOrReadOnlyMark(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -81,8 +82,8 @@ class IsProfessorOrReadOnlyMark(permissions.BasePermission):
         except Homework.DoesNotExist:
             return False
         return bool(request.user.status == 'p' and request.user.pk == professor_pk)
-#
-#Проверить__________________________________________________________________________________________
+
+
 class IsProfessorOrReadOnlyMarkDetail(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -95,25 +96,6 @@ class IsProfessorOrReadOnlyMarkDetail(permissions.BasePermission):
         except Homework.DoesNotExist:
             return False
         return bool(request.user.status == 'p' and request.user.pk == professor_pk)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class IsRegisteredStudent(permissions.BasePermission):
@@ -140,6 +122,3 @@ class IsRegisteredPersonHomework(permissions.BasePermission):
         if status_user in ('p',) and TeachCour.objects.filter(teacher_id=request.user.pk).filter(course_id=param):
             return True
         return False
-
-
-

@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,26 +11,25 @@ from app.serializers.serializers_mark_message import MarkDetailSerializers, Mark
     ListMessageForProfessorSerialezers
 
 
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Профессор ставит оценку, пишет комментарий"))
+@method_decorator(name='get', decorator=swagger_auto_schema(
+    operation_description="Профессор смотрит решения студентов. Разделил json на решения: "
+                          "проверенные и не проверенные им "))
 class ProfessorWatchHomework(generics.GenericAPIView):
-    """ Профессор смотрит solution и ставит оценку, может написать коментарий"""
+    """ Профессор смотрит solution и ставит оценку, может написать комментарий"""
 
     permission_classes = [IsAuthenticated, IsProfessorOrReadOnlyMark]
     serializer_class = MarkSerializer
     queryset = MyUser.objects.all()
 
     def get(self, request):
-        # query = Solution.objects.filter(task_solved=True,
-        #                                 homework_solution__professor_id=request.user.pk,
-        #                                 task_cheked=False)
-
-        # serializer = SolutionForCheckProfessorSerializer(query, many=True)
         query = Solution.objects.filter(task_solved=True,
                                         homework_solution__professor_id=request.user.pk)
         checked_query = query.filter(task_cheked=True)
         unchecked_query = query.filter(task_cheked=False)
         checked_serializer = SolutionForCheckProfessorSerializer(checked_query, many=True)
         unchecked_serializer = SolutionForCheckProfessorSerializer(unchecked_query, many=True)
-        # return Response(serializer.data)
         return Response(({'unchecked_solution': unchecked_serializer.data},
                          {'checked_solution': checked_serializer.data},)
                         )
@@ -41,33 +42,13 @@ class ProfessorWatchHomework(generics.GenericAPIView):
             Solution.objects.filter(id=request.data["solution_id"]).update(task_cheked=True)
             MessageTeacher.objects.create(message_solution_teachers_id=request.data["solution_id"],
                                           text=request.data["text_message_teacher"])
-            return Response(status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# class ProfessorChangeMark(generics.GenericAPIView):
-#     serializer_class = MarkDetailSerializers
-#
-#     def get_queryset(self):
-#         return Mark.objects.get(solution_id=self.request.data['solution_id'])
-#
-#     def put(self, request):
-#         object = self.get_queryset()
-#         print(object,'88888888888')
-#         # serializer = MarkDetailSerializers({'solution_id':request.data['solution_id']},
-#         #                                    {'user_mark_id': request.data.user.pk},
-#         #                                    instance=object,
-#         #                                    partial=True )
-#         serializer = MarkDetailSerializers(instance=object,
-#                                            partial=True)
-#         if serializer.is_valid(raise_exception=True):
-#             serializer.save()
-#             return Response(status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
+@method_decorator(name='put', decorator=swagger_auto_schema(
+    operation_description="Профессор обновляет оценку, пишет комментарий"))
 class ProfessorMarkDetail(generics.RetrieveUpdateAPIView):
-    """ Профессор меняет оценку"""
+    """ Профессор обновляет оценку и пишет комментарий"""
 
     permission_classes = [IsAuthenticated, IsProfessorOrReadOnlyMarkDetail]
     serializer_class = MarkDetailSerializers
@@ -75,19 +56,18 @@ class ProfessorMarkDetail(generics.RetrieveUpdateAPIView):
     lookup_field = 'solution_id'
 
     def put(self, request, *args, **kwargs):
-        print(kwargs, request.data, '********Добавить сохраненияе*****')
         MessageTeacher.objects.create(message_solution_teachers_id=kwargs['solution_id'],
                                       text=request.data["text_message_teacher"])
         return self.update(request, *args, **kwargs)
 
 
+@method_decorator(name='get', decorator=swagger_auto_schema(
+    operation_description="Студент смотрит оценку и комментарии профессора"))
 class StudentLookHisSolution(generics.GenericAPIView):
-    """ Студент смотрит solution и оценку, может написать коментарий"""
+    """ Студент смотрит оценку и комментарии профессора"""
 
     permission_classes = [IsAuthenticated, IsStudentReadOnly]
     serializer_class = StudentLookHisSolutionSerializers
-
-    # queryset = Solution.objects.filter()
 
     def get(self, request):
         query = Solution.objects.filter(task_solved=True,
@@ -100,7 +80,8 @@ class StudentLookHisSolution(generics.GenericAPIView):
                          {'unverified_homework': unverified_serializer.data})
                         )
 
-
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Студент пишет комментарий к Solution"))
 class StudentMessage(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, IsStudentReadOnly]
     serializer_class = StudentMessageSerializers
@@ -115,9 +96,11 @@ class StudentMessage(generics.GenericAPIView):
                                            context={'request': request})
         if serializer.is_valid(raise_exception=True):
             serializer.save(user_message_id=request.user.pk)
-            return Response(status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    operation_description="Проффесор смотрит сообщения студента к его Solution"))
 class ListMessageForProfessor(generics.ListAPIView):
     permission_classes = [IsAuthenticated, IsProfessorOrReadOnlyMarkDetail]
     serializer_class = ListMessageForProfessorSerialezers

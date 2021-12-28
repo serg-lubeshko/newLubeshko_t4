@@ -87,7 +87,8 @@ class AddTeacher(GenericAPIView):
 
 
 @method_decorator(name='put', decorator=swagger_auto_schema(
-    operation_description="Удаление нового студента к своему курсу. метод DELETE не позволяет ввести доп.поле на удаление"))
+    operation_description="Удаление нового студента к своему курсу. "
+                          "метод DELETE не позволяет ввести доп.поле на удаление"))
 @method_decorator(name='post', decorator=swagger_auto_schema(
     operation_description="Добавление нового студента к своему курсу"))
 class AddStudent(GenericAPIView):

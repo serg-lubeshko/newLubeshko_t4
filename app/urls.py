@@ -26,13 +26,11 @@ urlpatterns = [
 
     path('e-student-watch-task-and-add-solution/', SolutionToHomework.as_view()),
 
-    path('ef-professor-watch-message/', ListMessageForProfessor.as_view()),
-    path('ef-professor-watch-homework-add-mark-message/', ProfessorWatchHomework.as_view()),
+    path('eef-professor-watch-message/', ListMessageForProfessor.as_view()),
+    path('ef-professor-watch-solutions-add-mark-message/', ProfessorWatchHomework.as_view()),
     path('f-professor-update-mark-message/<int:solution_id>', ProfessorMarkDetail.as_view()),
-    # path('professor-update-mark/<int:solution_id>', ProfessorChangeMark.as_view()),
 
     path('g-student-look-check-solutions/', StudentLookHisSolution.as_view()),
-    # path('student-look-check-chatted/<int:solution_id>', StudentLookHisSolution.as_view()),
 
     path('student-write-message/', StudentMessage.as_view())
 

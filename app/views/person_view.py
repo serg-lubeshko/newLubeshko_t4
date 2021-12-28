@@ -1,5 +1,7 @@
 from django.contrib.auth import logout, authenticate, login, get_user_model
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import permissions, status
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
@@ -9,7 +11,8 @@ from app.serializers.serializers_person import UserSerializer, ListUsersSerializ
 
 MyUser = get_user_model()
 
-
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_description="Создание профессора/студента"))
 class UserRegister(CreateAPIView):
     """ Регистрация пользователя """
 
@@ -41,6 +44,8 @@ class MyLoginView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    operation_description="Список пользователей"))
 class ListPerson(ListAPIView):
     """ Вывод списка пользователей """
 

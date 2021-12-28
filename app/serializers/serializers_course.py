@@ -9,28 +9,19 @@ MyUser = get_user_model()
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    """>>>  CourseList  >>> DetailCourse"""
-
     name_course = serializers.CharField(max_length=125, validators=[UniqueValidator(queryset=Course.objects.all())])
+
     class Meta:
         model = Course
         fields = ['id', 'name_course', 'description', 'published_at', 'update_at']
-        
+
 
 class CourseDetailSerializer(serializers.ModelSerializer):
-
     author = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Course
         fields = ['id', 'name_course', 'description', 'published_at', 'update_at', 'author']
-
-
-
-
-
-
-
-
 
 
 class StudCourSerializer(serializers.ModelSerializer):
@@ -42,10 +33,6 @@ class StudCourSerializer(serializers.ModelSerializer):
 
 
 class TeachAddSerializer(serializers.ModelSerializer):
-    """ >>> AddTeacher """
-
-    # teacher = UserSerializer()
-
     class Meta:
         model = TeachCour
         fields = ['teacher', 'course']
@@ -60,8 +47,6 @@ class CoursesProfessorsSerializer(serializers.ModelSerializer):
 
 
 class AddTeacherSerializer(serializers.Serializer):
-    """ >>>  AddTeacher """
-
     teacher = serializers.ChoiceField(choices=[i.username for i in MyUser.objects.filter(status='p')])
 
     class Meta:
@@ -69,8 +54,6 @@ class AddTeacherSerializer(serializers.Serializer):
 
 
 class AddStudentSerializer(serializers.Serializer):
-    """ >>>  AddStudent  """
-
     student = serializers.ChoiceField(choices=[i.username for i in MyUser.objects.filter(status='s')], source='teacher')
 
     class Meta:
